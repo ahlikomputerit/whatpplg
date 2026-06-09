@@ -93,12 +93,26 @@ chmod +x update.sh
 ./update.sh
 ```
 
+## Pertama Kali — Setup GHCR
+
+```bash
+# 1. Login pakai token GitHub
+echo "TOKEN_ANDA" | docker login ghcr.io -u ahlikomputerit --password-stdin
+
+# 2. Build & push
+docker build -f Dockerfile.release -t ghcr.io/ahlikomputerit/whatpplg:latest .
+docker push ghcr.io/ahlikomputerit/whatpplg:latest
+
+# 3. Bikin Public (biar PC target bisa pull tanpa login)
+#    Buka https://github.com/users/ahlikomputerit/packages/container/whatpplg
+#    Klik Settings → Change visibility → Public
+```
+
 ## Catatan
 
 | Item | Keterangan |
 |------|------------|
-| Image publik? | Bisa diatur Public/Private di GHCR |
+| Image harus Public | Biar PC target bisa pull tanpa login |
 | Session WA | Aman di volume `wa-gateway-data` |
 | Config | File `config.yaml` di luar container, di-mount read-only |
 | Port | Sesuaikan `-p 8080:8080` kalau beda port |
-| Registry | Ganti `ghcr.io/ahlikomputerit/whatpplg` punya kamu |

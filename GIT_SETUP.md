@@ -7,7 +7,7 @@ ssh-keygen -t ed25519 -C "email@github.com"
 # Enter → Enter → Enter (accept default, no passphrase)
 ```
 
-## 2. Add ke GitHub
+## 2. Add SSH Key ke GitHub
 
 ```bash
 cat ~/.ssh/id_ed25519.pub
@@ -41,7 +41,53 @@ git push
 git clone git@github.com:USER/REPO.git
 ```
 
-## Catatan
+---
+
+# Docker Image — Build & Push ke GHCR
+
+## 1. Generate Token GitHub
+
+Buka https://github.com/settings/tokens → **Generate new token (classic)**
+Centang: **write:packages**, **read:packages** → Generate → Copy token
+
+## 2. Login ke GHCR
+
+```bash
+echo "TOKEN_ANDA" | docker login ghcr.io -u USERNAME --password-stdin
+```
+
+## 3. Build & Push Image
+
+```bash
+docker build -f Dockerfile.release -t ghcr.io/USERNAME/REPO:latest .
+docker push ghcr.io/USERNAME/REPO:latest
+```
+
+## 4. Bikin Image Public (biar PC target bisa pull tanpa login)
+
+1. Buka https://github.com/users/USERNAME/packages/container/REPO
+2. Klik **Package settings** (gear icon)
+3. **Change visibility** → **Public** → konfirmasi
+
+## 5. Pull & Run di PC Target
+
+```bash
+docker pull ghcr.io/USERNAME/REPO:latest
+
+docker rm -f wa-gateway
+
+docker run -d \
+  --name wa-gateway \
+  --restart unless-stopped \
+  -p 8080:8080 \
+  -v wa-gateway-data:/app/data \
+  -v $(pwd)/config.yaml:/app/config.yaml:ro \
+  ghcr.io/USERNAME/REPO:latest
+```
+
+---
+
+# Catatan Perintah
 
 | Perintah | Fungsi |
 |----------|--------|
@@ -55,3 +101,7 @@ git clone git@github.com:USER/REPO.git
 | `git pull` | Tarik perubahan terbaru |
 | `git status` | Cek status file |
 | `git log --oneline` | Lihat history commit |
+| `docker login ghcr.io` | Login ke GHCR (butuh token) |
+| `docker build -f Dockerfile.release -t IMAGE:tag .` | Build image |
+| `docker push IMAGE:tag` | Push ke registry |
+| `docker pull IMAGE:tag` | Pull dari registry |
