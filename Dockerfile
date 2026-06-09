@@ -7,6 +7,7 @@ WORKDIR /build
 
 # Cache dependencies
 COPY go.mod go.sum ./
+COPY whatsmeow/go.mod whatsmeow/go.sum ./whatsmeow/
 RUN go mod download
 
 # Copy source
@@ -24,7 +25,6 @@ WORKDIR /app
 
 COPY --from=builder /build/gateway .
 COPY --from=builder /build/config.yaml .
-COPY --from=builder /build/templates/ ./templates/
 
 VOLUME ["/app/data"]
 

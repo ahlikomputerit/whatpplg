@@ -6,6 +6,7 @@ RUN apk add --no-cache git ca-certificates gcc musl-dev
 WORKDIR /build
 
 COPY go.mod go.sum ./
+COPY whatsmeow/go.mod whatsmeow/go.sum ./whatsmeow/
 RUN go mod download
 
 COPY . .
