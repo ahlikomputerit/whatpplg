@@ -1,0 +1,9 @@
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+.vscode
+.idea
+tmp/
+*.test
+example/example

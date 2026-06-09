@@ -1,0 +1,60 @@
+# ============================================================
+# WA Gateway Service — Konfigurasi
+# ============================================================
+
+server:
+  port: 8080
+  api_key: "ganti-dengan-api-key-rahasia"
+
+whatsapp:
+  db_path: "/app/data/wa_session.db"
+  preset: "moderate"
+  config:
+    enable_typo_injection: true
+    enable_zero_width: true
+    enable_emoji_padding: false
+    enable_punctuation_vary: true
+
+sources:
+  - name: "default"
+    mode: "api"
+    api_key: "key-default-123"
+
+  - name: "laporan-sekolah"
+    mode: "api"
+    api_key: "key-laporan-123"
+    allowed_templates:
+      - "laporan-pelanggaran"
+      - "pemberitahuan"
+
+queue:
+  type: "memory"
+  max_size: 10000
+
+templates:
+  - name: "laporan-pelanggaran"
+    body: |
+      Assalamu'alaikum Wr. Wb.
+
+      Yth. Bpk/Ibu {nama_ortu}
+
+      Diberitahukan bahwa {nama_siswa} kelas {kelas}
+      telah melakukan pelanggaran:
+
+      {kategori}: {deskripsi}
+
+      Poin: {poin}
+      Sanksi: {sanksi}
+
+      Mohon kerjasama Bapak/Ibu.
+
+      Wassalamu'alaikum Wr. Wb.
+      - {sekolah}
+
+  - name: "pemberitahuan"
+    body: |
+      Yth. {nama}
+
+      {isi_pesan}
+
+      Terima kasih.

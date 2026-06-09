@@ -1,0 +1,80 @@
+version: "3.9"
+
+x-common: &common
+  restart: unless-stopped
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  # ============================================================
+  # WA Gateway Service
+  # ============================================================
+  gateway:
+    <<: *common
+    # ---- Production: pakai image dari registry ----
+    image: ghcr.io/ahlikomputerit/whatpplg:latest
+    # ---- Development: build dari source ----
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    ports:
+      - "${PORT:-8080}:8080"
+    volumes:
+      - gateway-data:/app/data
+      - ${CONFIG_FILE:-./config.yaml}:/app/config.yaml:ro
+      - ${TEMPLATES_DIR:-./templates}:/app/templates:ro
+    environment:
+      - TZ=${TZ:-Asia/Jakarta}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ============================================================
+  # Redis (opsional)
+  # ============================================================
+  redis:
+    <<: *common
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    profiles:
+      - with-redis
+
+  # ============================================================
+  # PostgreSQL (opsional)
+  # ============================================================
+  postgres:
+    <<: *common
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: gateway
+      POSTGRES_USER: gateway
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-changeme123}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gateway"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    profiles:
+      - with-postgres
+
+volumes:
+  gateway-data:
+  redis-data:
+  postgres-data:
